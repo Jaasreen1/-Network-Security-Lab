@@ -38,3 +38,24 @@ The generated report is saved to `reports/informe_demo.md`.
 4. Run the command above with your own file paths.
 
 **Interpretation warning:** An open port is not proof of a vulnerability, and packet counts are not proof of an intrusion. This tool reports metadata only; independent validation is required.
+
+## Experimental local monitoring and passive security checks
+
+A separate module performs periodic HTTP HEAD checks on **loopback-only** services (`localhost`, `127.0.0.1`, `::1`). It records HTTP status, latency, availability, and **potential** missing security headers. Redirects are not followed.
+
+Start a local test service in one terminal:
+
+```bash
+python -m http.server 8000 --bind 127.0.0.1
+```
+
+Then in another terminal:
+
+```bash
+python src/security_monitor.py --url http://127.0.0.1:8000 --interval 5 --count 3
+```
+
+The monitor writes timestamped JSONL records to `reports/monitor.jsonl`. Use `--count 0` for continuous monitoring (stop with Ctrl+C). **No remote hosts are permitted.**
+
+These checks are **not a comprehensive vulnerability scanner**: they identify a small set of potential header misconfigurations, not confirmed vulnerabilities. The project does not yet include a web dashboard or a vulnerability database.
+
