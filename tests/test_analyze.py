@@ -27,3 +27,27 @@ class AnalyzerTests(unittest.TestCase):
             path.write_text("foo,bar\na,b\n")
             with self.assertRaises(ValueError):
                 read_traffic(path)
+
+    def test_empty_traffic_csv(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "empty.csv"
+            path.write_text("Source,Destination,Protocol\n")
+            self.assertEqual(read_traffic(path)["packets"], 0)
+
+    def test_invalid_nmap_root(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "invalid.xml"
+            path.write_text("<notnmap/>")
+            with self.assertRaises(ValueError):
+                read_nmap(path)
+
+    def test_no_ports(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "empty_ports.xml"
+            path.write_text('<nmaprun><host><address addr="192.0.2.30"/></host></nmaprun>')
+            self.assertEqual(read_nmap(path)[0]["ports"], [])
+
+    def test_report_contains_protocols(self):
+        traffic = read_traffic(ROOT / "samples/traffic_demo.csv")
+        text = report([], traffic, True)
+        self.assertIn("- DNS: 2", text)
