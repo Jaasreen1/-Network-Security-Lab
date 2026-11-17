@@ -44,9 +44,9 @@ def report(hosts, traffic, synthetic=False):
             lines.append(f"- {port['protocol']}/{port['port']}: {port['state']} — reported service: {port['service']}")
         lines.append("")
     lines += ["## Traffic summary", f"Packets: {traffic['packets']}", "", "### Protocols"]
-    lines += [f"- {name}: {count}" for name, count in traffic["protocols"].most_common()]
+    lines += [f"- {name}: {count}" for name, count in Counter(traffic["protocols"]).most_common()]
     lines += ["", "### Conversations"]
-    lines += [f"- `{src}` → `{dst}`: {count}" for (src, dst), count in traffic["conversations"].most_common(10)]
+    lines += [f"- `{src}` → `{dst}`: {count}" for (src, dst), count in Counter(traffic["conversations"]).most_common(10)]
     lines += ["", "## Limitations", "Metadata summaries do not prove vulnerabilities or intrusions. Validate findings manually."]
     return "\n".join(lines) + "\n"
 
